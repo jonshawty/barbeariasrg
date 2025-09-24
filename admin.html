@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin | Barbearia Elite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f5f2;
+        }
+        .reserva-card {
+            transition: all 0.3s ease;
+        }
+        .reserva-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col p-4">
+    <header class="flex items-center justify-between mb-8">
+        <a href="index.html" class="mr-4">
+            <i data-feather="arrow-left" class="text-gray-700"></i>
+        </a>
+        <h1 class="text-2xl font-bold text-gray-800">Painel Admin</h1>
+        <div></div> <!-- Espaçador -->
+    </header>
+
+    <main class="flex-1">
+        <div class="mb-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Agendamentos</h2>
+            <div id="listaAgendamentos" class="space-y-4">
+                <!-- Agendamentos serão carregados aqui via JavaScript -->
+            </div>
+        </div>
+
+        <div>
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Clientes</h2>
+            <div id="listaClientes" class="space-y-4">
+                <!-- Clientes serão carregados aqui via JavaScript -->
+            </div>
+        </div>
+    </main>
+
+    <script>
+        feather.replace();
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const agendamentos = JSON.parse(localStorage.getItem('agendamentos') || '[]');
+            const listaAgendamentos = document.getElementById('listaAgendamentos');
+            const listaClientes = document.getElementById('listaClientes');
+            
+            // Mostrar agendamentos
+            if (agendamentos.length === 0) {
+                listaAgendamentos.innerHTML = `
+                    <div class="text-center py-4">
+                        <p class="text-gray-600">Nenhum agendamento encontrado</p>
+                    </div>
+                `;
+            } else {
+                listaAgendamentos.innerHTML = agendamentos.map((agendamento, index) => `
+                    <div class="reserva-card bg-white p-4 rounded-lg shadow border-l-4 ${agendamento.status === 'confirmado' ? 'border-green-500' : 'border-red-500'}">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-bold text-lg capitalize">${agendamento.servico}</h3>
+                                <p class="text-gray-600"><i data-feather="user" class="inline mr-1 w-4 h-4"></i> ${agendamento.barbeiro}</p>
+                                <p class="text-gray-600"><i data-feather="calendar" class="inline mr-1 w-4 h-4"></i> ${formatarData(agendamento.data)} às ${agendamento.hora}</p>
+                                <p class="text-gray-600 mt-1"><i data-feather="phone" class="inline mr-1 w-4 h-4"></i> ${localStorage.getItem('usuarioTelefone') || 'N/A'}</p>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-xs font-medium ${agendamento.status === 'confirmado' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                ${agendamento.status === 'confirmado' ? 'Confirmado' : 'Cancelado'}
+                            </span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            // Mostrar clientes (simplificado)
+            const telefone = localStorage.getItem('usuarioTelefone');
+            if (telefone) {
+                listaClientes.innerHTML = `
+                    <div class="reserva-card bg-white p-4 rounded-lg shadow">
+                        <div class="flex items-center">
+                            <div class="bg-amber-100 p-3 rounded-full mr-4">
+                                <i data-feather="user" class="text-amber-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold">Cliente</h3>
+                                <p class="text-gray-600">${telefone}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                listaClientes.innerHTML = `
+                    <div class="text-center py-4">
+                        <p class="text-gray-600">Nenhum cliente encontrado</p>
+                    </div>
+                `;
+            }
+            
+            feather.replace();
+        });
+        
+        function formatarData(dataString) {
+            const data = new Date(dataString);
+            return data.toLocaleDateString('pt-BR');
+        }
+        
+        // Simular app mobile
+        if (window.matchMedia('(max-width: 640px)').matches) {
+            document.body.style.height = window.innerHeight + 'px';
+            window.addEventListener('resize', () => {
+                document.body.style.height = window.innerHeight + 'px';
+            });
+        }
+    </script>
+</body>
+</html>

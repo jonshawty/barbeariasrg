@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minhas Reservas | Barbearia Elite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f5f2;
+        }
+        .reserva-card {
+            transition: all 0.3s ease;
+        }
+        .reserva-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col p-4">
+    <header class="flex items-center mb-8">
+        <a href="index.html" class="mr-4">
+            <i data-feather="arrow-left" class="text-gray-700"></i>
+        </a>
+        <h1 class="text-2xl font-bold text-gray-800">Minhas Reservas</h1>
+    </header>
+
+    <main class="flex-1">
+        <div id="listaReservas" class="space-y-4">
+            <!-- Reservas serão carregadas aqui via JavaScript -->
+        </div>
+    </main>
+
+    <script>
+        feather.replace();
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const agendamentos = JSON.parse(localStorage.getItem('agendamentos') || '[]');
+            const listaReservas = document.getElementById('listaReservas');
+            
+            if (agendamentos.length === 0) {
+                listaReservas.innerHTML = `
+                    <div class="text-center py-10">
+                        <i data-feather="calendar" class="mx-auto text-gray-400 w-12 h-12"></i>
+                        <p class="mt-4 text-gray-600">Nenhuma reserva encontrada</p>
+                        <a href="novo-agendamento.html" class="mt-6 inline-block px-6 py-2 bg-amber-500 text-white rounded-lg">
+                            Agendar agora
+                        </a>
+                    </div>
+                `;
+                feather.replace();
+                return;
+            }
+            
+            listaReservas.innerHTML = agendamentos.map((agendamento, index) => `
+                <div class="reserva-card bg-white p-4 rounded-lg shadow border-l-4 border-amber-500">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-bold text-lg capitalize">${agendamento.servico}</h3>
+                            <p class="text-gray-600"><i data-feather="user" class="inline mr-1 w-4 h-4"></i> ${agendamento.barbeiro}</p>
+                            <p class="text-gray-600"><i data-feather="calendar" class="inline mr-1 w-4 h-4"></i> ${formatarData(agendamento.data)} às ${agendamento.hora}</p>
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-xs font-medium ${agendamento.status === 'confirmado' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                            ${agendamento.status === 'confirmado' ? 'Confirmado' : 'Cancelado'}
+                        </span>
+                    </div>
+                    <div class="mt-4 flex justify-end">
+                        <button onclick="cancelarReserva(${index})" class="px-4 py-1 text-sm text-red-600 hover:bg-red-50 rounded">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            feather.replace();
+        });
+        
+        function formatarData(dataString) {
+            const data = new Date(dataString);
+            return data.toLocaleDateString('pt-BR');
+        }
+        
+        function cancelarReserva(index) {
+            if (!confirm('Tem certeza que deseja cancelar este agendamento?')) return;
+            
+            let agendamentos = JSON.parse(localStorage.getItem('agendamentos') || '[]');
+            agendamentos[index].status = 'cancelado';
+            localStorage.setItem('agendamentos', JSON.stringify(agendamentos));
+            
+            // Recarregar a lista
+            document.dispatchEvent(new Event('DOMContentLoaded'));
+        }
+        
+        // Simular app mobile
+        if (window.matchMedia('(max-width: 640px)').matches) {
+            document.body.style.height = window.innerHeight + 'px';
+            window.addEventListener('resize', () => {
+                document.body.style.height = window.innerHeight + 'px';
+            });
+        }
+    </script>
+</body>
+</html>
